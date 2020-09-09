@@ -1,0 +1,77 @@
+run:
+  build-tags:
+    - citest
+
+issues:
+  exclude-use-default: false
+  exclude:
+    - Error return value of `\w+\.(Close|Remove)\` is not checked
+    - at least one file in a package should have a package comment
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - const
+        - dupl
+        - gochecknoglobals
+        - goconst
+        - golint
+        - lll
+        - unparam
+
+linters-settings:
+  gocyclo:
+    min-complexity: 35
+
+  gocognit:
+    min-complexity: 60
+
+  lll:
+    line-length: 180
+    tab-width: 2
+
+#  misspell:
+#    ignore-words:
+#      - mosquitto
+
+linters:
+  disable-all: true
+  enable:
+    - bodyclose
+    - deadcode
+    - depguard
+    - dogsled
+    - errcheck
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - gofmt
+    - goimports
+    - golint
+    - gosimple
+    - govet
+    - ineffassign
+    - lll
+    - maligned
+    - misspell
+    - nakedret
+    - prealloc
+    - scopelint
+    - structcheck
+    - staticcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unused
+    - varcheck
+    - whitespace
+    - unparam
+
+  # don't enable:
+  # - funlen
+  # - gochecknoglobals
+  # - gochecknoinits
+  # - godox
+  # - gosec
+  # - interfacer
+  # - dupl
