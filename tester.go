@@ -37,7 +37,6 @@ type Tester interface {
 }
 
 // NewTester returns a new tester that supports setting the Index
-//
 func NewTester(t *testing.T) Tester {
 	return &tester{t: t}
 }

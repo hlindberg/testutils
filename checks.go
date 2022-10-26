@@ -307,10 +307,13 @@ func AsFloat(v interface{}) (rv float64, ok bool) {
 	}
 	return
 }
+
+// AsInterface returns the argument as an interface{}. This is useful when a value
+// may be a reflect.Value and an operation does not work on such, but on the underlying real
+// value albeit behind an interface{}.
 func AsInterface(v interface{}) (rv interface{}, ok bool) {
 	ok = true
 	switch et := v.(type) {
-
 	case reflect.Value:
 		rv = et.Interface()
 	// case string:
