@@ -24,9 +24,6 @@ jobs:
           # Optional: version of golangci-lint to use in form of v1.2 or v1.2.3 or `latest` to use the latest version
           version: v1.50
 
-      - name: Lint
-        run: ./bin/golangci-lint run ./...
-
   test-windows:
     name: Test Windows
     runs-on: windows-latest
