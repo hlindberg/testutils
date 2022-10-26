@@ -1,8 +1,7 @@
 // Package testutils contains convenient testing checkers that compare a produced
 // value against an expected value (or condition).
-// There are value checks like `CheckEqual(expected, produced, t)``, and
+// There are value checks like `CheckEqual(expected, produced, t)“, and
 // checks that should run deferred like `defer ShouldPanic(t)`.
-//
 package testutils
 
 import (
@@ -51,9 +50,25 @@ func CheckMatches(expected interface{}, got string, t *testing.T) {
 	}
 }
 
+// func valuesEqual(a interface{}, b interface{}) bool {
+// 	nc := numericCompare(a, b)
+// 	return nc == 0 || nc == -2 && reflect.DeepEqual(a, b)
+// }
+
 func valuesEqual(a interface{}, b interface{}) bool {
 	nc := numericCompare(a, b)
-	return nc == 0 || nc == -2 && reflect.DeepEqual(a, b)
+	var ok bool
+	if nc == -2 {
+		// Not numerically equal
+		// Since DeepEqual does not return true for some cases of reflected values. (Not sure why).
+		sa, ok1 := AsInterface(a)
+		sb, ok2 := AsInterface(b)
+		if ok1 && ok2 && sa == sb {
+			return true
+		}
+		ok = reflect.DeepEqual(a, b)
+	}
+	return nc == 0 || nc == -2 && ok
 }
 
 // CheckEqualAndNoError checks there is no error, and that two values are deeply equal and calls t.Fatalf if not
@@ -75,14 +90,14 @@ func CheckContainsElements(expected interface{}, got interface{}, t *testing.T) 
 
 // CheckEqualElements checks if two slices contains the exact same set of elements irrespective of order and uniqueness.
 func CheckEqualElements(expected interface{}, got interface{}, t *testing.T) {
-	if sliceContains(got, expected, false) {
+	if !sliceContains(got, expected, true) {
 		t.Helper()
 		t.Fatalf("Elements of slice %v and %v differ", expected, got)
 	}
 }
 
 // sliceContainsAll returns true if a contains all elements in b, irrespective of order. Each element is
-// matched exactly once.
+// matched exactly once. If checkSize is given a and b must have the same size.
 func sliceContains(a, b interface{}, checkSize bool) bool {
 	va := reflect.ValueOf(a)
 	if va.Kind() != reflect.Slice {
@@ -93,17 +108,21 @@ func sliceContains(a, b interface{}, checkSize bool) bool {
 		return false
 	}
 	tb := vb.Len()
+	ta := va.Len()
+
+	if checkSize && ta != tb {
+		return false
+	}
+	// any set contains an empty set
 	if tb == 0 {
 		return true
 	}
-	ta := va.Len()
+	// an empty set cannot contain a non empty set
 	if ta == 0 {
 		return false
 	}
+	// a smaller set cannot contain all from a larger set
 	if ta < tb {
-		return false
-	}
-	if checkSize && ta != tb {
 		return false
 	}
 	ma := make([]bool, ta)
@@ -183,7 +202,6 @@ func CheckNumericLess(expected interface{}, got interface{}, t *testing.T) {
 // bit size and an integer is equal to a float if casting it to a float makes it equal.
 // Return 0 if numerically equal, 1 if got is greater than expected, and -1 if less.
 // In case they are not numeric values a value of -2 is returned.
-//
 func numericCompare(expected interface{}, got interface{}) int {
 	if ei, ok := AsInteger(expected); ok {
 		if gi, ok := AsInteger(got); ok {
@@ -284,6 +302,21 @@ func AsFloat(v interface{}) (rv float64, ok bool) {
 		rv = float64(et)
 	case float64:
 		rv = et
+	default:
+		ok = false
+	}
+	return
+}
+func AsInterface(v interface{}) (rv interface{}, ok bool) {
+	ok = true
+	switch et := v.(type) {
+
+	case reflect.Value:
+		rv = et.Interface()
+	// case string:
+	// 	rv = string(et)
+	// case bool:
+	// 	rv = bool(et)
 	default:
 		ok = false
 	}

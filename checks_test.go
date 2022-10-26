@@ -72,3 +72,45 @@ func TestCheckFalse(t *testing.T) {
 		CheckFalse(true, ft)
 	})
 }
+
+func TestCheckEqualElements(t *testing.T) {
+	expected := []string{"a", "b", "c"}
+	got := []string{"a", "b", "c"}
+	ensureNotFailed(t, func(ft *testing.T) {
+		CheckEqualElements(expected, got, ft)
+	})
+
+	got = []string{"c", "b", "a"}
+	ensureNotFailed(t, func(ft *testing.T) {
+		CheckEqualElements(expected, got, ft)
+	})
+
+	got = []string{"a"}
+	ensureFailed(t, func(ft *testing.T) {
+		CheckEqualElements(expected, got, ft)
+	})
+}
+
+func Test_valuesEqual(t *testing.T) {
+	if !valuesEqual(1, 1) {
+		t.Fail()
+	}
+	if valuesEqual("1", 1) {
+		t.Fail()
+	}
+	if !valuesEqual("a", "a") {
+		t.Fail()
+	}
+	if !valuesEqual(false, false) {
+		t.Fail()
+	}
+	if valuesEqual(false, true) {
+		t.Fail()
+	}
+	if !valuesEqual([]string{"a"}, []string{"a"}) {
+		t.Fail()
+	}
+	if valuesEqual([]string{"a", "b"}, []string{"b", "a"}) {
+		t.Fail()
+	}
+}
