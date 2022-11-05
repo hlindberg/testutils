@@ -34,6 +34,8 @@ type Tester interface {
 	CheckBefore(expected, got time.Time, add ...time.Duration)
 	CheckBeforeOrEqual(expected, got time.Time, add ...time.Duration)
 	CheckMatches(expected interface{}, got string)
+	Fatalf(fmt string, args ...interface{})
+	CheckTruef(predicate bool, fmt string, args ...interface{})
 }
 
 // NewTester returns a new tester that supports setting the Index
@@ -218,4 +220,12 @@ func (tt *tester) CheckMatches(expected interface{}, got string) {
 		tt.t.Helper()
 		tt.Fatalf("Expected match for %q, got %s", rx.String(), got)
 	}
+}
+
+// CheckTruef takes a predicate (outcome of a test) and if it is false calls tester t Failf
+func (tt *tester) CheckTruef(predicate bool, fmt string, args ...interface{}) {
+	if predicate {
+		return
+	}
+	tt.t.Fatalf(fmt, args...)
 }

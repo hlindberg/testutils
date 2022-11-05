@@ -42,3 +42,20 @@ func TestTester_Before(t *testing.T) {
 		tt.CheckBefore(now, earlier)
 	})
 }
+func TestTester_Fatalf(t *testing.T) {
+	ensureFailed(t, func(ft *testing.T) {
+		tt := NewTester(ft)
+		tt.Fatalf("The pope's hat isn't funny")
+	})
+}
+
+func TestTester_CheckTruef(t *testing.T) {
+	ensureFailed(t, func(ft *testing.T) {
+		tt := NewTester(ft)
+		tt.CheckTruef(false, "Oh no %s %s", "Blistering", "Barnacles")
+	})
+	ensureNotFailed(t, func(ft *testing.T) {
+		tt := NewTester(ft)
+		tt.CheckTruef(true, "Oh no %s %s", "Blistering", "Barnacles")
+	})
+}
