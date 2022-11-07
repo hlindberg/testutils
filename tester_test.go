@@ -59,3 +59,23 @@ func TestTester_CheckTruef(t *testing.T) {
 		tt.CheckTruef(true, "Oh no %s %s", "Blistering", "Barnacles")
 	})
 }
+
+func Test_produceDiff(t *testing.T) {
+	expected := []string{"abc", "def", "xyz"}
+	got := []string{"abcd", "def", "xyza", "longer"}
+
+	ensureFailed(t, func(ft *testing.T) {
+		tt := NewTester(ft)
+		tt.CheckStringSlicesEqual(expected, got)
+	})
+	ensureNotFailed(t, func(ft *testing.T) {
+		tt := NewTester(ft)
+		tt.CheckStringSlicesEqual(expected, expected)
+	})
+	// TODO: Check that output is the expected
+	//
+	// diff, ok := produceDiff(expected, got)
+	// if !ok {
+	// 	t.Fatalf("unequal slices - see diff\n%s", diff)
+	// }
+}

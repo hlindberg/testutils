@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 )
@@ -36,6 +37,7 @@ type Tester interface {
 	CheckMatches(expected interface{}, got string)
 	Fatalf(fmt string, args ...interface{})
 	CheckTruef(predicate bool, fmt string, args ...interface{})
+	CheckStringSlicesEqual(expected, got []string)
 }
 
 // NewTester returns a new tester that supports setting the Index
@@ -228,4 +230,56 @@ func (tt *tester) CheckTruef(predicate bool, fmt string, args ...interface{}) {
 		return
 	}
 	tt.t.Fatalf(fmt, args...)
+}
+
+// CheckStringSlicesEqual
+func (tt *tester) CheckStringSlicesEqual(expected, got []string) {
+	diff, ok := produceDiff(expected, got)
+	if !ok {
+		tt.t.Fatalf("slices not equal - see diff:\n%s", diff)
+	}
+}
+
+// Produces expected and actual interleaved with a not if the are equal or not. Returns ok if there is no diff
+// and a each index below each other output for easy human comparison of mismatched result.
+func produceDiff(expected, got []string) (diff string, ok bool) {
+	cmpE := expected
+	cmpG := got
+	lE := len(expected)
+	lG := len(got)
+	if lE < lG {
+		cmpE = make([]string, lG)
+		copy(cmpE, expected)
+	}
+	if lE > lG {
+		cmpG = make([]string, lE)
+		copy(cmpG, got)
+	}
+	isDiff := false
+	var result []string
+	ok = true
+	for i, e := range cmpE {
+		isDiff = (e != cmpG[i])
+		markerE := " = "
+		markerG := " = "
+		switch {
+		case isDiff && lE < lG && i >= lE:
+			markerE = "-! "
+			markerG = " !+"
+		case isDiff && lE > lG && i >= lG:
+			markerE = "+! "
+			markerG = " !-"
+		case isDiff:
+			markerE = " ! "
+			markerG = " ! "
+		}
+		if isDiff {
+			ok = false
+		}
+
+		// add expected and then got
+		result = append(result, fmt.Sprintf("%s e[%d] `%s`", markerE, i, e))
+		result = append(result, fmt.Sprintf("%s g[%d] `%s`", markerG, i, cmpG[i]))
+	}
+	return strings.Join(result, "\n"), ok
 }
