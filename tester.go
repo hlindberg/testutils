@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
 // Tester wraps a *testing.T and an Index for iterative tests
@@ -38,6 +40,7 @@ type Tester interface {
 	Fatalf(fmt string, args ...interface{})
 	CheckTruef(predicate bool, fmt string, args ...interface{})
 	CheckStringSlicesEqual(expected, got []string)
+	CheckTextEqual(expected, got string)
 }
 
 // NewTester returns a new tester that supports setting the Index
@@ -258,6 +261,7 @@ func produceDiff(expected, got []string) (diff string, ok bool) {
 	isDiff := false
 	var result []string
 	ok = true
+	badCount := 0
 	for i, e := range cmpE {
 		isDiff = (e != cmpG[i])
 		markerE := " = "
@@ -278,8 +282,30 @@ func produceDiff(expected, got []string) (diff string, ok bool) {
 		}
 
 		// add expected and then got
-		result = append(result, fmt.Sprintf("%s e[%d] `%s`", markerE, i, e))
-		result = append(result, fmt.Sprintf("%s g[%d] `%s`", markerG, i, cmpG[i]))
+		if !isDiff {
+			result = append(result, fmt.Sprintf("%s eg[%d] `%s`", markerE, i, e))
+			badCount = 0
+		} else {
+			result = append(result, fmt.Sprintf("%s  e[%d] `%s`", markerE, i, e))
+			result = append(result, fmt.Sprintf("%s  g[%d] `%s`", markerG, i, cmpG[i]))
+			badCount++
+			if badCount > 2 {
+				result = append(result, "... stopping after 2 unequal lines")
+				break
+			}
+		}
 	}
 	return strings.Join(result, "\n"), ok
+}
+
+// CheckTextEqual behaves like CheckEqual in general, but in addition to just failing
+// a color coded diff will be produced in the error message making it easier to see where the
+// difference is (when run in a terminal window).
+func (tt *tester) CheckTextEqual(expected, got string) {
+	if expected != got {
+		dmp := diffmatchpatch.New()
+		diffs := dmp.DiffMain(expected, got, false)
+		pretty := dmp.DiffPrettyText(diffs)
+		tt.t.Fatalf("strings not equal - see diff:\n%s", pretty)
+	}
 }

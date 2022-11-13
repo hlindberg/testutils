@@ -1,6 +1,7 @@
 package testutils
 
 import (
+	"strings"
 	"testing"
 	"time"
 )
@@ -78,4 +79,22 @@ func Test_produceDiff(t *testing.T) {
 	// if !ok {
 	// 	t.Fatalf("unequal slices - see diff\n%s", diff)
 	// }
+}
+func Test_CheckTextEqual(t *testing.T) {
+	expected := strings.Join([]string{"abc", "def", "xyz"}, "\n")
+	got := strings.Join([]string{"abcd", "def", "xyza", "longer"}, "\n")
+	ensureFailed(t, func(ft *testing.T) {
+		tt := NewTester(ft)
+		tt.CheckTextEqual(expected, got)
+	})
+	ensureNotFailed(t, func(ft *testing.T) {
+		tt := NewTester(ft)
+		tt.CheckTextEqual(expected, expected)
+	})
+}
+func Test_CheckTextEqualFailing(t *testing.T) {
+	expected := strings.Join([]string{"abc", "def", "xyz"}, "\n")
+	got := strings.Join([]string{"abcd", "def", "xyza", "longer"}, "\n")
+	tt := NewTester(t)
+	tt.CheckTextEqual(expected, got)
 }
