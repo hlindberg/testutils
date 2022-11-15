@@ -232,6 +232,7 @@ func (tt *tester) CheckTruef(predicate bool, fmt string, args ...interface{}) {
 	if predicate {
 		return
 	}
+	tt.t.Helper()
 	tt.t.Fatalf(fmt, args...)
 }
 
@@ -239,6 +240,7 @@ func (tt *tester) CheckTruef(predicate bool, fmt string, args ...interface{}) {
 func (tt *tester) CheckStringSlicesEqual(expected, got []string) {
 	diff, ok := produceDiff(expected, got)
 	if !ok {
+		tt.t.Helper()
 		tt.t.Fatalf("slices not equal - see diff:\n%s", diff)
 	}
 }
