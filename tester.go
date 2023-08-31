@@ -23,6 +23,7 @@ type Tester interface {
 	// At sets index and returns this for convenient chaining as tt.At(i).CheckXXX()
 	At(index int) Tester
 	CheckEqual(expected interface{}, got interface{})
+	CheckNotEqual(expected interface{}, got interface{})
 	CheckNumericGreater(expected interface{}, got interface{})
 	CheckNumericLess(expected interface{}, got interface{})
 	CheckEqualAndNoError(expected interface{}, got interface{}, gotError error)
@@ -56,7 +57,11 @@ func (tt *tester) At(index int) Tester {
 
 func (tt *tester) unequalValues(e, g interface{}) {
 	tt.t.Helper()
-	tt.Fatalf("Expected: %T %v, got %T %v", e, e, g, g)
+	tt.Fatalf("Expected Equal: %T %v, got %T %v", e, e, g, g)
+}
+func (tt *tester) equalValues(e, g interface{}) {
+	tt.t.Helper()
+	tt.Fatalf("Expected Noti Equal: %T %v, got %T %v", e, e, g, g)
 }
 
 func (tt *tester) Fatalf(str string, args ...interface{}) {
@@ -74,6 +79,15 @@ func (tt *tester) CheckEqual(expected interface{}, got interface{}) {
 	if !(nc == 0 || nc == -2 && reflect.DeepEqual(expected, got)) {
 		tt.t.Helper()
 		tt.unequalValues(expected, got)
+	}
+}
+
+// CheckNotEqual checks if two values are deeply equal and calls t.Fatalf if not
+func (tt *tester) CheckNotEqual(expected interface{}, got interface{}) {
+	nc := numericCompare(expected, got)
+	if nc == 0 || nc == -2 && reflect.DeepEqual(expected, got) {
+		tt.t.Helper()
+		tt.equalValues(expected, got)
 	}
 }
 

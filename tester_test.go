@@ -98,3 +98,7 @@ func Test_CheckTextEqualFailing(t *testing.T) {
 	tt := NewTester(t)
 	tt.CheckTextEqual(expected, got)
 }
+func Test_CheckEqual(t *testing.T) {
+	tt := NewTester(t)
+	tt.CheckNotEqual(1, 2)
+}
