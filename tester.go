@@ -322,6 +322,7 @@ func (tt *tester) CheckTextEqual(expected, got string) {
 		dmp := diffmatchpatch.New()
 		diffs := dmp.DiffMain(expected, got, false)
 		pretty := dmp.DiffPrettyText(diffs)
+		tt.t.Helper()
 		tt.t.Fatalf("strings not equal - see diff:\n%s", pretty)
 	}
 }
