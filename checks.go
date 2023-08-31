@@ -16,7 +16,11 @@ import (
 
 func unequalValues(e, g interface{}, t *testing.T) {
 	t.Helper()
-	t.Fatalf("Expected: %T %v, got %T %v", e, e, g, g)
+	t.Fatalf("Expected equal: %T %v, got %T %v", e, e, g, g)
+}
+func equalValues(e, g interface{}, t *testing.T) {
+	t.Helper()
+	t.Fatalf("Expected not equal: %T %v, got %T %v", e, e, g, g)
 }
 
 // CheckEqual checks if two values are deeply equal and calls t.Fatalf if not
@@ -24,6 +28,14 @@ func CheckEqual(expected interface{}, got interface{}, t *testing.T) {
 	if !valuesEqual(expected, got) {
 		t.Helper()
 		unequalValues(expected, got, t)
+	}
+}
+
+// CheckNotEqual checks if two values are deeply equal and calls t.Fatalf if not
+func CheckNotEqual(expected interface{}, got interface{}, t *testing.T) {
+	if valuesEqual(expected, got) {
+		t.Helper()
+		equalValues(expected, got, t)
 	}
 }
 

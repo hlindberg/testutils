@@ -36,6 +36,11 @@ func TestCheckEqual(t *testing.T) {
 		CheckEqual("a", "b", ft)
 	})
 }
+func TestCheckNotEqual(t *testing.T) {
+	ensureFailed(t, func(ft *testing.T) {
+		CheckNotEqual("a", "a", ft)
+	})
+}
 
 func TestCheckNil(t *testing.T) {
 	ensureFailed(t, func(ft *testing.T) {
